@@ -2,22 +2,8 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 
 import { CoolMasterHomebridgePlatform } from './platform';
 
-/**
- * Platform Accessory
- * An instance of this class is created for each accessory your platform registers
- * Each accessory may expose multiple services of different service types.
- */
 export class CoolMasterPlatformAccessory {
   private service: Service;
-
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
-  private exampleStates = {
-    On: false,
-    Brightness: 100,
-  };
 
   constructor(
     private readonly platform: CoolMasterHomebridgePlatform,
@@ -32,66 +18,83 @@ export class CoolMasterPlatformAccessory {
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+    this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.exampleDisplayName);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName);
 
-    // register handlers for the On/Off Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
-      .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
+    this.service.getCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState)
+      .onGet(this.handleCurrentHeaterCoolerStateGet.bind(this));
 
-    // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this));       // SET - bind to the 'setBrightness` method below
+    this.service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState)
+      .onGet(this.handleTargetHeaterCoolerStateGet.bind(this))
+      .onSet(this.handleTargetHeaterCoolerStateSet.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+      .onGet(this.handleCurrentTemperatureGet.bind(this));
 
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
+   * Handle requests to get the current value of the "Active" characteristic
    */
-  async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
+  handleActiveGet() {
+    this.platform.log.debug('Triggered GET Active');
 
-    this.platform.log.debug('Set Characteristic On ->', value);
+    // set this to a valid value for Active
+    const currentValue = this.platform.Characteristic.Active.INACTIVE;
+
+    return currentValue;
   }
 
   /**
-   * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possbile. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
+   * Handle requests to set the "Active" characteristic
    */
-  async getOn(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
-    const isOn = this.exampleStates.On;
-
-    this.platform.log.debug('Get Characteristic On ->', isOn);
-
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-
-    return isOn;
+  handleActiveSet(value) {
+    this.platform.log.debug('Triggered SET Active:', value);
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
+   * Handle requests to get the current value of the "Current Heater-Cooler State" characteristic
    */
-  async setBrightness(value: CharacteristicValue) {
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
+  handleCurrentHeaterCoolerStateGet() {
+    this.platform.log.debug('Triggered GET CurrentHeaterCoolerState');
 
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+    // set this to a valid value for CurrentHeaterCoolerState
+    const currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE;
+
+    return currentValue;
+  }
+
+
+  /**
+   * Handle requests to get the current value of the "Target Heater-Cooler State" characteristic
+   */
+  handleTargetHeaterCoolerStateGet() {
+    this.platform.log.debug('Triggered GET TargetHeaterCoolerState');
+
+    // set this to a valid value for TargetHeaterCoolerState
+    const currentValue = this.platform.Characteristic.TargetHeaterCoolerState.AUTO;
+
+    return currentValue;
+  }
+
+  /**
+   * Handle requests to set the "Target Heater-Cooler State" characteristic
+   */
+  handleTargetHeaterCoolerStateSet(value) {
+    this.platform.log.debug('Triggered SET TargetHeaterCoolerState:', value);
+  }
+
+  /**
+   * Handle requests to get the current value of the "Current Temperature" characteristic
+   */
+  handleCurrentTemperatureGet() {
+    this.platform.log.debug('Triggered GET CurrentTemperature');
+
+    // set this to a valid value for CurrentTemperature
+    const currentValue = -273.15;
+
+    return currentValue;
   }
 
 }
