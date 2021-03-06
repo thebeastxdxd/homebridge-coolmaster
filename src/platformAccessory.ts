@@ -92,7 +92,7 @@ export class CoolMasterPlatformAccessory {
     this.platform.log.debug('Triggered GET CurrentTemperature');
 
     // set this to a valid value for CurrentTemperature
-    const currentValue = -273.15;
+    const currentValue = 25.1;
 
     return currentValue;
   }
