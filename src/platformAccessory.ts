@@ -32,6 +32,14 @@ export class CoolMasterPlatformAccessory {
     this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
       .onGet(this.handleCurrentTemperatureGet.bind(this));
 
+    this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature)
+      .onGet(this.handleCoolingThresholdTemperatureGet.bind(this))
+      .onSet(this.handleCoolingThresholdTemperatureSet.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
+      .onGet(this.handleHeatingThresholdTemperatureGet.bind(this))
+      .onSet(this.handleHeatingThresholdTemperatureSet.bind(this));
+
   }
 
   /**
@@ -92,9 +100,31 @@ export class CoolMasterPlatformAccessory {
     this.platform.log.debug('Triggered GET CurrentTemperature');
 
     // set this to a valid value for CurrentTemperature
-    const currentValue = 25.1;
+    const currentValue = 24;
 
     return currentValue;
+  }
+
+  handleCoolingThresholdTemperatureGet() {
+    this.platform.log.debug('Triggered GET CoolingThresholdTemperature');
+    const currentValue = 24;
+
+    return currentValue;
+  }
+
+  handleCoolingThresholdTemperatureSet(value) {
+    this.platform.log.debug('Triggered SET CoolingThresholdTemperature:', value);
+  }
+
+  handleHeatingThresholdTemperatureGet() {
+    this.platform.log.debug('Triggered GET HeatingThresholdTemperature');
+    const currentValue = 24;
+
+    return currentValue;
+  }
+
+  handleHeatingThresholdTemperatureSet(value) {
+    this.platform.log.debug('Triggered SET HeatingThresholdTemperature:', value);
   }
 
 }
