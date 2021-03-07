@@ -23,7 +23,7 @@ export class CoolMasterPlatformAccessory {
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName);
 
-    this.service.getCharacteristic(this.Characteristic.Active)
+    this.service.getCharacteristic(this.platform.Characteristic.Active)
       .onGet(this.handleActiveGet.bind(this))
       .onSet(this.handleActiveSet.bind(this));
 
