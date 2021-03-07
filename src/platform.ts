@@ -9,6 +9,8 @@ interface CoolMasterAccessoryConfig {
 }
 
 interface CoolMasterConfig extends PlatformConfig {
+  ip: string;
+  serial: string;
   accessories: CoolMasterAccessoryConfig[];
 }
 

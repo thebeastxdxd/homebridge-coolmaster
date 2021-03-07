@@ -1,6 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-
 import { CoolMasterHomebridgePlatform } from './platform';
+import fetch from 'node-fetch';
 
 export class CoolMasterPlatformAccessory {
   private service: Service;
@@ -18,7 +18,8 @@ export class CoolMasterPlatformAccessory {
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler);
+    this.service = this.accessory.getService(this.platform.Service.HeaterCooler)
+     || this.accessory.addService(this.platform.Service.HeaterCooler);
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName);
 
@@ -47,20 +48,31 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to get the current value of the "Active" characteristic
    */
-  handleActiveGet() {
+  async handleActiveGet() {
     this.platform.log.debug('Triggered GET Active');
 
     // set this to a valid value for Active
-    const currentValue = this.platform.Characteristic.Active.INACTIVE;
+    //const currentValue = this.platform.Characteristic.Active.INACTIVE;
 
-    return currentValue;
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+     + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&o');
+    const data = await response.json();
+    return Number(data.data[0]);
+
+    //return currentValue;
   }
 
   /**
    * Handle requests to set the "Active" characteristic
    */
-  handleActiveSet(value) {
+  async handleActiveSet(value) {
     this.platform.log.debug('Triggered SET Active:', value);
+
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+    + '/raw?command=' + (value ? 'on' : 'off') + '&' + this.accessory.context.device.uniqueId);
+
+    const data = await response.json();
+    return data.rc;
   }
 
   /**
