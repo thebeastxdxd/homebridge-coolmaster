@@ -145,19 +145,28 @@ export class CoolMasterPlatformAccessory {
   async handleTargetHeaterCoolerStateSet(value: CharacteristicValue) {
     this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered SET TargetHeaterCoolerState:', value);
 
-    let command = 'cool';
+    let response, data;
 
     switch (value) {
       case this.platform.Characteristic.TargetHeaterCoolerState.COOL:
-        command = 'cool';
+        await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+        + '/raw?command=cool&' + this.accessory.context.device.uniqueId);
+        response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+        + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&h');
+        data = await response.json();
+        this.platform.log.debug(this.accessory.context.device.displayName + ' CoolingThresholdTemperature is ' + Number(data.data[0]));
+        this.service.updateCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature, Number(data.data[0]));
         break;
       case this.platform.Characteristic.TargetHeaterCoolerState.HEAT:
-        command = 'heat';
+        await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+        + '/raw?command=heat&' + this.accessory.context.device.uniqueId);
+        response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+        + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&h');
+        data = await response.json();
+        this.platform.log.debug(this.accessory.context.device.displayName + ' HeatingThresholdTemperature is ' + Number(data.data[0]));
+        this.service.updateCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature, Number(data.data[0]));
         break;
     }
-
-    await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
-    + '/raw?command=' + command + '&' + this.accessory.context.device.uniqueId);
   }
 
   /**
