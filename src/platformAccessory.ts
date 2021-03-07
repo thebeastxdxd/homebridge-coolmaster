@@ -78,11 +78,27 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to get the current value of the "Current Heater-Cooler State" characteristic
    */
-  handleCurrentHeaterCoolerStateGet() {
+  async handleCurrentHeaterCoolerStateGet() {
     this.platform.log.debug('Triggered GET CurrentHeaterCoolerState');
 
     // set this to a valid value for CurrentHeaterCoolerState
-    const currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE;
+    let currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE;
+
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+    + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&m');
+    const data = await response.json();
+
+    this.platform.log.debug('CurrentHeaterCoolerState is ' + Number(data.data[0]));
+
+    switch (Number(data.data[0])) {
+      case 0:
+      case 3:
+        currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.COOLING;
+        break;
+      case 1:
+        currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.HEATING;
+        break;
+    }
 
     return currentValue;
   }
@@ -91,11 +107,27 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to get the current value of the "Target Heater-Cooler State" characteristic
    */
-  handleTargetHeaterCoolerStateGet() {
+  async handleTargetHeaterCoolerStateGet() {
     this.platform.log.debug('Triggered GET TargetHeaterCoolerState');
 
     // set this to a valid value for TargetHeaterCoolerState
-    const currentValue = this.platform.Characteristic.TargetHeaterCoolerState.AUTO;
+    let currentValue = this.platform.Characteristic.TargetHeaterCoolerState.COOL;
+
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+    + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&m');
+    const data = await response.json();
+
+    this.platform.log.debug('CurrentHeaterCoolerState is ' + Number(data.data[0]));
+
+    switch (Number(data.data[0])) {
+      case 0:
+      case 3:
+        currentValue = this.platform.Characteristic.TargetHeaterCoolerState.COOL;
+        break;
+      case 1:
+        currentValue = this.platform.Characteristic.TargetHeaterCoolerState.HEAT;
+        break;
+    }
 
     return currentValue;
   }
@@ -103,8 +135,25 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to set the "Target Heater-Cooler State" characteristic
    */
-  handleTargetHeaterCoolerStateSet(value) {
+  async handleTargetHeaterCoolerStateSet(value) {
     this.platform.log.debug('Triggered SET TargetHeaterCoolerState:', value);
+
+    let command = 'cool';
+
+    switch (value) {
+      case this.platform.Characteristic.TargetHeaterCoolerState.COOL:
+        command = 'cool';
+        break;
+      case this.platform.Characteristic.TargetHeaterCoolerState.HEAT:
+        command = 'heat';
+        break;
+    }
+
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+    + '/raw?command=' + command + '&' + this.accessory.context.device.uniqueId);
+
+    const data = await response.json();
+    return data.rc;
   }
 
   /**
