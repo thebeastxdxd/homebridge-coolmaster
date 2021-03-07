@@ -52,7 +52,8 @@ export class CoolMasterPlatformAccessory {
       }
       return this.fetchRetry(url);
     })
-      .catch(err => {
+      //.catch(err => {
+      .catch(() => {
         //this.platform.log.error(err);
         return this.fetchRetry(url);
       });
