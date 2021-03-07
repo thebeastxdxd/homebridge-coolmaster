@@ -1,7 +1,7 @@
 {
   "private": true,
   "displayName": "CoolMasterNet Module",
-  "name": "homebridge-plugin-name",
+  "name": "homebridge-coolmaster",
   "version": "1.0.0",
   "description": "CoolMasterNet Homebridge platform plugin",
   "license": "Apache-2.0",
