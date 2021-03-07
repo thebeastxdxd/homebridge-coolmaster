@@ -61,7 +61,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Active" characteristic
    */
   async handleActiveGet() {
-    this.platform.log.info('Triggered GET Active');
+    this.platform.log.debug('Triggered GET Active');
 
     const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&o');
@@ -76,7 +76,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to set the "Active" characteristic
    */
   async handleActiveSet(value: CharacteristicValue) {
-    this.platform.log.info('Triggered SET Active:', value);
+    this.platform.log.debug('Triggered SET Active:', value);
 
     await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
     + '/raw?command=' + (value ? 'on' : 'off') + '&' + this.accessory.context.device.uniqueId);
@@ -86,7 +86,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Current Heater-Cooler State" characteristic
    */
   async handleCurrentHeaterCoolerStateGet() {
-    this.platform.log.info('Triggered GET CurrentHeaterCoolerState');
+    this.platform.log.debug('Triggered GET CurrentHeaterCoolerState');
 
     // set this to a valid value for CurrentHeaterCoolerState
     let currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE;
@@ -95,7 +95,7 @@ export class CoolMasterPlatformAccessory {
     + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&m');
     const data = await response.json();
 
-    this.platform.log.info('CurrentHeaterCoolerState is ' + Number(data.data[0]));
+    this.platform.log.debug('CurrentHeaterCoolerState is ' + Number(data.data[0]));
 
     switch (Number(data.data[0])) {
       case 0:
@@ -115,7 +115,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Target Heater-Cooler State" characteristic
    */
   async handleTargetHeaterCoolerStateGet() {
-    this.platform.log.info('Triggered GET TargetHeaterCoolerState');
+    this.platform.log.debug('Triggered GET TargetHeaterCoolerState');
 
     // set this to a valid value for TargetHeaterCoolerState
     let currentValue = this.platform.Characteristic.TargetHeaterCoolerState.COOL;
@@ -124,7 +124,7 @@ export class CoolMasterPlatformAccessory {
     + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&m');
     const data = await response.json();
 
-    this.platform.log.info('CurrentHeaterCoolerState is ' + Number(data.data[0]));
+    this.platform.log.debug('CurrentHeaterCoolerState is ' + Number(data.data[0]));
 
     switch (Number(data.data[0])) {
       case 0:
@@ -143,7 +143,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to set the "Target Heater-Cooler State" characteristic
    */
   async handleTargetHeaterCoolerStateSet(value: CharacteristicValue) {
-    this.platform.log.info('Triggered SET TargetHeaterCoolerState:', value);
+    this.platform.log.debug('Triggered SET TargetHeaterCoolerState:', value);
 
     let command = 'cool';
 
@@ -164,19 +164,19 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
   async handleCurrentTemperatureGet() {
-    this.platform.log.info('Triggered GET CurrentTemperature');
+    this.platform.log.debug('Triggered GET CurrentTemperature');
 
     const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=ls2&' + this.accessory.context.device.uniqueId);
     const data = await response.json();
 
-    this.platform.log.info('CurrentTemperature is ' + Number(data.data[0].substr(17, 4)));
+    this.platform.log.debug('CurrentTemperature is ' + Number(data.data[0].substr(17, 4)));
 
     return Number(data.data[0].substr(17, 4));
   }
 
   async handleThresholdTemperatureGet() {
-    this.platform.log.info('Triggered GET ThresholdTemperature');
+    this.platform.log.debug('Triggered GET ThresholdTemperature');
 
     const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&h');
@@ -188,7 +188,7 @@ export class CoolMasterPlatformAccessory {
   }
 
   async handleThresholdTemperatureSet(value: CharacteristicValue) {
-    this.platform.log.info('Triggered SET ThresholdTemperature:', value);
+    this.platform.log.debug('Triggered SET ThresholdTemperature:', value);
 
     await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=temp&' + this.accessory.context.device.uniqueId + '&' + value);
