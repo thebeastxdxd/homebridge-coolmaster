@@ -30,7 +30,7 @@ export class CoolMasterPlatformAccessory {
       .onGet(this.handleTargetHeaterCoolerStateGet.bind(this))
       .onSet(this.handleTargetHeaterCoolerStateSet.bind(this));
 
-    this.service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState).props.validValues = [0, 1, 2];
+    this.service.getCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState).props.validValues = [1, 2];
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
       .onGet(this.handleCurrentTemperatureGet.bind(this));
