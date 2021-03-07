@@ -61,13 +61,13 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Active" characteristic
    */
   async handleActiveGet() {
-    this.platform.log.debug('Triggered GET Active');
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered GET Active');
 
     const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&o');
     const data = await response.json();
 
-    this.platform.log.debug('Active is ' + Number(data.data[0]));
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Active is ' + Number(data.data[0]));
 
     return Number(data.data[0]);
   }
@@ -76,7 +76,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to set the "Active" characteristic
    */
   async handleActiveSet(value: CharacteristicValue) {
-    this.platform.log.debug('Triggered SET Active:', value);
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered SET Active:', value);
 
     await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
     + '/raw?command=' + (value ? 'on' : 'off') + '&' + this.accessory.context.device.uniqueId);
@@ -86,28 +86,24 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Current Heater-Cooler State" characteristic
    */
   async handleCurrentHeaterCoolerStateGet() {
-    this.platform.log.debug('Triggered GET CurrentHeaterCoolerState');
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered GET CurrentHeaterCoolerState');
 
-    // set this to a valid value for CurrentHeaterCoolerState
-    let currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE;
-
-    const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
-    + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&m');
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v2.0/device/'+ this.platform.config.serial
+     + '/ls2&' + this.accessory.context.device.uniqueId);
     const data = await response.json();
 
-    this.platform.log.debug('CurrentHeaterCoolerState is ' + Number(data.data[0]));
+    this.platform.log.debug(this.accessory.context.device.displayName + ' LS2 State: ' + JSON.stringify(data.data[0]));
 
-    switch (Number(data.data[0])) {
-      case 0:
-      case 3:
-        currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.COOLING;
-        break;
-      case 1:
-        currentValue = this.platform.Characteristic.CurrentHeaterCoolerState.HEATING;
-        break;
+    if (data.data[0].onoff === 'OFF') {
+      this.platform.log.debug(this.accessory.context.device.displayName + ' CurrentHeaterCoolerState is INACTIVE');
+      return this.platform.Characteristic.CurrentHeaterCoolerState.INACTIVE;
+    } else if (data.data[0].mode === 'Heat') {
+      this.platform.log.debug(this.accessory.context.device.displayName + ' CurrentHeaterCoolerState is HEATING');
+      return this.platform.Characteristic.CurrentHeaterCoolerState.HEATING;
+    } else {
+      this.platform.log.debug(this.accessory.context.device.displayName + ' CurrentHeaterCoolerState is COOLING');
+      return this.platform.Characteristic.CurrentHeaterCoolerState.COOLING;
     }
-
-    return currentValue;
   }
 
 
@@ -115,7 +111,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Target Heater-Cooler State" characteristic
    */
   async handleTargetHeaterCoolerStateGet() {
-    this.platform.log.debug('Triggered GET TargetHeaterCoolerState');
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered GET TargetHeaterCoolerState');
 
     // set this to a valid value for TargetHeaterCoolerState
     let currentValue = this.platform.Characteristic.TargetHeaterCoolerState.COOL;
@@ -124,14 +120,14 @@ export class CoolMasterPlatformAccessory {
     + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&m');
     const data = await response.json();
 
-    this.platform.log.debug('CurrentHeaterCoolerState is ' + Number(data.data[0]));
-
     switch (Number(data.data[0])) {
       case 0:
       case 3:
+        this.platform.log.debug(this.accessory.context.device.displayName + ' TargetHeaterCoolerState is COOL');
         currentValue = this.platform.Characteristic.TargetHeaterCoolerState.COOL;
         break;
       case 1:
+        this.platform.log.debug(this.accessory.context.device.displayName + ' TargetHeaterCoolerState is HEAT');
         currentValue = this.platform.Characteristic.TargetHeaterCoolerState.HEAT;
         break;
     }
@@ -143,7 +139,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to set the "Target Heater-Cooler State" characteristic
    */
   async handleTargetHeaterCoolerStateSet(value: CharacteristicValue) {
-    this.platform.log.debug('Triggered SET TargetHeaterCoolerState:', value);
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered SET TargetHeaterCoolerState:', value);
 
     let command = 'cool';
 
@@ -164,31 +160,31 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
   async handleCurrentTemperatureGet() {
-    this.platform.log.debug('Triggered GET CurrentTemperature');
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered GET CurrentTemperature');
 
     const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=ls2&' + this.accessory.context.device.uniqueId);
     const data = await response.json();
 
-    this.platform.log.debug('CurrentTemperature is ' + Number(data.data[0].substr(17, 4)));
+    this.platform.log.debug(this.accessory.context.device.displayName + ' CurrentTemperature is ' + Number(data.data[0].substr(17, 4)));
 
     return Number(data.data[0].substr(17, 4));
   }
 
   async handleThresholdTemperatureGet() {
-    this.platform.log.debug('Triggered GET ThresholdTemperature');
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered GET ThresholdTemperature');
 
     const response = await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&h');
     const data = await response.json();
 
-    this.platform.log.info('ThresholdTemperature is ' + Number(data.data[0]));
+    this.platform.log.debug(this.accessory.context.device.displayName + ' ThresholdTemperature is ' + Number(data.data[0]));
 
     return Number(data.data[0]);
   }
 
   async handleThresholdTemperatureSet(value: CharacteristicValue) {
-    this.platform.log.debug('Triggered SET ThresholdTemperature:', value);
+    this.platform.log.debug(this.accessory.context.device.displayName + ' Triggered SET ThresholdTemperature:', value);
 
     await this.fetchRetry('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
      + '/raw?command=temp&' + this.accessory.context.device.uniqueId + '&' + value);
