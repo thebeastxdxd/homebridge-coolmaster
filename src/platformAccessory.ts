@@ -43,9 +43,13 @@ export class CoolMasterPlatformAccessory {
       .onGet(this.handleThresholdTemperatureGet.bind(this))
       .onSet(this.handleThresholdTemperatureSet.bind(this));
 
+    this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature).props.minValue = 16;
+
     this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
       .onGet(this.handleThresholdTemperatureGet.bind(this))
       .onSet(this.handleThresholdTemperatureSet.bind(this));
+
+    this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature).props.minValue = 10;
 
   }
 
