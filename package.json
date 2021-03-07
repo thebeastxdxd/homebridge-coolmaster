@@ -1,5 +1,5 @@
 {
-  "private": true,
+  "private": false,
   "displayName": "CoolMasterNet Module",
   "name": "homebridge-coolmaster",
   "version": "1.0.0",
