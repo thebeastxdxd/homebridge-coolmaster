@@ -67,7 +67,7 @@ export class CoolMasterPlatformAccessory {
      + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&o');
     const data = await response.json();
 
-    this.platform.log.info('Active is ' + Number(data.data[0]));
+    this.platform.log.debug('Active is ' + Number(data.data[0]));
 
     return Number(data.data[0]);
   }
