@@ -36,12 +36,12 @@ export class CoolMasterPlatformAccessory {
       .onGet(this.handleCurrentTemperatureGet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.CoolingThresholdTemperature)
-      .onGet(this.handleCoolingThresholdTemperatureGet.bind(this))
-      .onSet(this.handleCoolingThresholdTemperatureSet.bind(this));
+      .onGet(this.handleThresholdTemperatureGet.bind(this))
+      .onSet(this.handleThresholdTemperatureSet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.HeatingThresholdTemperature)
-      .onGet(this.handleHeatingThresholdTemperatureGet.bind(this))
-      .onSet(this.handleHeatingThresholdTemperatureSet.bind(this));
+      .onGet(this.handleThresholdTemperatureGet.bind(this))
+      .onSet(this.handleThresholdTemperatureSet.bind(this));
 
   }
 
@@ -65,7 +65,7 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to set the "Active" characteristic
    */
-  async handleActiveSet(value) {
+  async handleActiveSet(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET Active:', value);
 
     const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
@@ -135,7 +135,7 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to set the "Target Heater-Cooler State" characteristic
    */
-  async handleTargetHeaterCoolerStateSet(value) {
+  async handleTargetHeaterCoolerStateSet(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET TargetHeaterCoolerState:', value);
 
     let command = 'cool';
@@ -159,35 +159,39 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
-  handleCurrentTemperatureGet() {
+  async handleCurrentTemperatureGet() {
     this.platform.log.debug('Triggered GET CurrentTemperature');
 
     // set this to a valid value for CurrentTemperature
-    const currentValue = 24;
+    //const currentValue = 24;
 
-    return currentValue;
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+     + '/raw?command=ls2&' + this.accessory.context.device.uniqueId);
+    const data = await response.json();
+    return Number(data.data[0].substr(17, 4));
+
+    //return currentValue;
   }
 
-  handleCoolingThresholdTemperatureGet() {
-    this.platform.log.debug('Triggered GET CoolingThresholdTemperature');
-    const currentValue = 24;
+  async handleThresholdTemperatureGet() {
+    this.platform.log.debug('Triggered GET ThresholdTemperature');
+    //const currentValue = 24;
 
-    return currentValue;
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+     + '/raw?command=query&' + this.accessory.context.device.uniqueId + '&h');
+    const data = await response.json();
+    return Number(data.data[0]);
+
+    //return currentValue;
   }
 
-  handleCoolingThresholdTemperatureSet(value) {
-    this.platform.log.debug('Triggered SET CoolingThresholdTemperature:', value);
-  }
+  async handleThresholdTemperatureSet(value: CharacteristicValue) {
+    this.platform.log.debug('Triggered SET ThresholdTemperature:', value);
 
-  handleHeatingThresholdTemperatureGet() {
-    this.platform.log.debug('Triggered GET HeatingThresholdTemperature');
-    const currentValue = 24;
-
-    return currentValue;
-  }
-
-  handleHeatingThresholdTemperatureSet(value) {
-    this.platform.log.debug('Triggered SET HeatingThresholdTemperature:', value);
+    const response = await fetch('http://'+ this.platform.config.ip + ':10103/v1.0/device/'+ this.platform.config.serial
+     + '/raw?command=temp&' + this.accessory.context.device.uniqueId + '&' + value);
+    const data = await response.json();
+    return data.rc;
   }
 
 }
