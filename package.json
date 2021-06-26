@@ -1,16 +1,16 @@
 {
   "private": false,
-  "displayName": "CoolMasterNet Module",
-  "name": "homebridge-coolmaster",
+  "displayName": "CoolMaster Putty Plugin",
+  "name": "homebridge-coolmaster-putty",
   "version": "1.0.7",
-  "description": "CoolMasterNet Homebridge platform plugin",
-  "license": "Apache-2.0",
+  "description": "CoolMaster Putty Homebridge platform plugin",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/artnavsegda/homebridge-coolmaster.git"
+    "url": "git://github.com/thebeastxdxd/homebridge-coolmaster.git"
   },
   "bugs": {
-    "url": "https://github.com/artnavsegda/homebridge-coolmaster/issues"
+    "url": "https://github.com/thebeastxdxd/homebridge-coolmaster/issues"
   },
   "engines": {
     "node": ">=10.17.0",
@@ -18,16 +18,19 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/**.ts --max-warnings=0",
-    "watch": "npm run build && npm link && nodemon",
+    "clean": "rimraf ./dist",
     "build": "rimraf ./dist && tsc",
-    "prepublishOnly": "npm run lint && npm run build"
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "homebridge-plugin"
   ],
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "net": "^1.0.2",
+    "node-fetch": "^2.6.1",
+    "promise-socket": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.31",
