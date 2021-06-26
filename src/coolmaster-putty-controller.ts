@@ -27,10 +27,18 @@ export class CoolMasterController {
     const data = await this.serverController.connect({ host: this.ipaddress, port: serverControllerPort });
   }
 
+  async serverControllerReadUntilNewLine() {
+    let data: string = <string>await this.serverController.read();
+    while (!data?.includes("\n")) {
+      data += await this.serverController.read();
+    }
+    return data;
+  }
+
   async serverControllerSend(data: string) : Promise<string> {
     const written = await this.serverController.write(data);
     this.log.debug(`written bytes ${written}`);
-    const received_data: string | Buffer | undefined = await this.serverController.readAll(); 
+    const received_data: string | Buffer | undefined = await this.serverControllerReadUntilNewLine();
     this.log.debug(`received data ${received_data}`);
     return <string>received_data;
   }
