@@ -30,7 +30,7 @@ export class CoolMasterController {
   async serverControllerSend(data: string) : Promise<string> {
     const written = await this.serverController.write(data);
     this.log.debug(`written bytes ${written}`);
-    const received_data: string | Buffer | undefined = await this.serverController.read(); 
+    const received_data: string | Buffer | undefined = await this.serverController.readAll(); 
     this.log.debug(`received data ${received_data}`);
     return <string>received_data;
   }
