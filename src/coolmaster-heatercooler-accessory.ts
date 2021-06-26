@@ -203,7 +203,7 @@ export class CoolMasterPlatformAccessory {
 
     return Number(data.data[0]);
     */
-    return 99;
+    return 22;
   }
 
   async handleThresholdTemperatureSet(value: CharacteristicValue) {
