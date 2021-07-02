@@ -75,6 +75,7 @@ export class CoolMasterPlatformAccessory {
   }
 
   async handleTemperatureUnitsGet() {
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered GET TemperatureDisplayUnits`);
     return this.controller.GetTemperatureUnit();
   }
 
@@ -106,13 +107,13 @@ export class CoolMasterPlatformAccessory {
     this.log.debug(`${this.accessory.context.device.displayName} LS2 State: ${state}`);
 
     if (state.onOff === 'OFF') {
-      this.log.debug(this.accessory.context.device.displayName + ' CurrentHeaterCoolerState is INACTIVE');
+      this.log.debug(`${this.accessory.context.device.displayName} CurrentHeaterCoolerState is INACTIVE`);
       return this.hap.Characteristic.CurrentHeaterCoolerState.INACTIVE;
     } else if (state.mode === 'Heat') {
-      this.log.debug(this.accessory.context.device.displayName + ' CurrentHeaterCoolerState is HEATING');
+      this.log.debug(`${this.accessory.context.device.displayName} CurrentHeaterCoolerState is HEATING`);
       return this.hap.Characteristic.CurrentHeaterCoolerState.HEATING;
     } else {
-      this.log.debug(this.accessory.context.device.displayName + ' CurrentHeaterCoolerState is COOLING');
+      this.log.debug(`${this.accessory.context.device.displayName} CurrentHeaterCoolerState is COOLING`);
       return this.hap.Characteristic.CurrentHeaterCoolerState.COOLING;
     }
   }
@@ -122,7 +123,7 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Target Heater-Cooler State" characteristic
    */
   async handleTargetHeaterCoolerStateGet() {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered GET TargetHeaterCoolerState');
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered GET TargetHeaterCoolerState`);
 
     const stateMode = await this.controller.GetTemperatureModeState(this.accessory.context.device.uniqueId);
     let currentValue: number = this.hap.Characteristic.TargetHeaterCoolerState.COOL;
@@ -130,11 +131,11 @@ export class CoolMasterPlatformAccessory {
     switch (stateMode) {
       case 0:
       case 3:
-        this.log.debug(this.accessory.context.device.displayName + ' TargetHeaterCoolerState is COOL');
+        this.log.debug(`${this.accessory.context.device.displayName} TargetHeaterCoolerState is COOL`);
         currentValue = this.hap.Characteristic.TargetHeaterCoolerState.COOL;
         break;
       case 1:
-        this.log.debug(this.accessory.context.device.displayName + ' TargetHeaterCoolerState is HEAT');
+        this.log.debug(`${this.accessory.context.device.displayName} TargetHeaterCoolerState is HEAT`);
         currentValue = this.hap.Characteristic.TargetHeaterCoolerState.HEAT;
         break;
     }
@@ -146,20 +147,20 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to set the "Target Heater-Cooler State" characteristic
    */
   async handleTargetHeaterCoolerStateSet(value: CharacteristicValue) {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered SET TargetHeaterCoolerState:', value);
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered SET TargetHeaterCoolerState: ${value}`);
 
     let targetTemp;
     switch (value) {
       case this.hap.Characteristic.TargetHeaterCoolerState.COOL:
         await this.controller.SetCoolState(this.accessory.context.device.uniqueId);
         targetTemp = await this.controller.GetTargetTemperatureState(this.accessory.context.device.uniqueId) as CharacteristicValue;
-        this.log.debug(this.accessory.context.device.displayName + ' CoolingThresholdTemperature is ' + targetTemp);
+        this.log.debug(`${this.accessory.context.device.displayName} CoolingThresholdTemperature is ${targetTemp}`);
         this.coolerHeaterService.updateCharacteristic(this.hap.Characteristic.CoolingThresholdTemperature, targetTemp);
         break;
       case this.hap.Characteristic.TargetHeaterCoolerState.HEAT:
         await this.controller.SetHeatState(this.accessory.context.device.uniqueId);
         targetTemp = await this.controller.GetTargetTemperatureState(this.accessory.context.device.uniqueId) as CharacteristicValue;
-        this.log.debug(this.accessory.context.device.displayName + ' HeatingThresholdTemperature is ' + targetTemp);
+        this.log.debug(`${this.accessory.context.device.displayName} HeatingThersholdTemperature is ${targetTemp}`);
         this.coolerHeaterService.updateCharacteristic(this.hap.Characteristic.HeatingThresholdTemperature, targetTemp);
         break;
     }
@@ -169,33 +170,33 @@ export class CoolMasterPlatformAccessory {
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
   async handleCurrentTemperatureGet() {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered GET CurrentTemperature');
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered GET CurrentTemperature`);
 
     const state = await this.controller.GetLs2State(this.accessory.context.device.uniqueId);
 
-    this.log.debug(this.accessory.context.device.displayName + ' CurrentTemperature is ' + Number(state.roomTemperature));
+    this.log.debug(`${this.accessory.context.device.displayName} CurrentTemperature is ${Number(state.roomTemperature)}`);
 
     return Number(state.roomTemperature);
   }
 
   async handleThresholdTemperatureGet() {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered GET ThresholdTemperature');
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered GET ThresholdTemperature`);
 
     const targetTemp = await this.controller.GetTargetTemperatureState(this.accessory.context.device.uniqueId) as CharacteristicValue;
 
-    this.log.debug(this.accessory.context.device.displayName + ' ThresholdTemperature is ' + targetTemp);
+    this.log.debug(`${this.accessory.context.device.displayName} ThresholdTemperature is  ${targetTemp}`);
 
     return targetTemp;
   }
 
   async handleThresholdTemperatureSet(value: CharacteristicValue) {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered SET ThresholdTemperature:', value);
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered SET ThresholdTemperature: ${value}`);
     await this.controller.SetTargetTemperatureState(this.accessory.context.device.uniqueId, value as Number);
 
   }
 
   async handleFanSpeedGet() {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered GET Rotation(Fan) Speed');
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered GET Rotation(Fan) Speed`);
     const fanSpeed = await this.controller.GetFanSpeed(this.accessory.context.device.uniqueId);
 
     let fanSpeedValue :CharacteristicValue = 0.0;
@@ -225,7 +226,7 @@ export class CoolMasterPlatformAccessory {
   }
 
   async handleFanSpeedSet(value: CharacteristicValue) {
-    this.log.debug(this.accessory.context.device.displayName + ' Triggered SET Rotation(Fan) Speed:', value);
+    this.log.debug(`${this.accessory.context.device.displayName} Triggered SET Rotation(Fan) Speed: ${value}`);
     let fanSpeedMode = "a";
     if (value <= 25.0) {
       fanSpeedMode = "l";
