@@ -1,4 +1,3 @@
-import * as net from 'net';
 import telnet_client from 'telnet-client';
 import { Logging, CharacteristicValue } from 'homebridge';
 
@@ -16,8 +15,6 @@ export class CoolMasterController {
     this.log = log;
     this.ipaddress = ipaddress;
     this.quedCommands = [];
-    const socket = new net.Socket();
-    socket.setEncoding("ascii");
     this.serverController = new telnet_client();
     this.log.info("Connecting to CoolMaster Controller at ", ipaddress);
     this.serverControllerConnect();
@@ -38,7 +35,7 @@ export class CoolMasterController {
       const result = await this.serverController.exec(this.quedCommands[0][0]);
       this.log.debug(`command ${this.quedCommands[0][0]}, result ${result}`);
 
-      this.quedCommands[0][1](this.parseCommandResult(result));
+      this.quedCommands[0][1](result);
 
       this.quedCommands.shift();
     }
@@ -57,7 +54,7 @@ export class CoolMasterController {
 
   async GetPowerState(uid: string): Promise<Number> {
     const data = await this.serverControllerQueueCommand(`query ${uid} o\n`);
-    return Number(data);
+    return Number(this.parseCommandResult(data));
   }
 
   async SetTemperatureUnit(value: string) {
@@ -74,7 +71,7 @@ export class CoolMasterController {
 
   async GetFanSpeed(uid: string) {
     const data = await this.serverControllerQueueCommand(`query ${uid} f\n`);
-    return Number(data);
+    return Number(this.parseCommandResult(data));
   }
 
 
@@ -96,12 +93,12 @@ export class CoolMasterController {
 
   async GetTemperatureModeState(uid: string) {
     const data = await this.serverControllerQueueCommand(`query ${uid} m\n`);
-    return Number(data);
+    return Number(this.parseCommandResult(data));
   }
 
   async GetTargetTemperatureState(uid: string) {
     const data = await this.serverControllerQueueCommand(`query ${uid} h\n`);
-    return Number(data);
+    return Number(this.parseCommandResult(data));
   }
 
   async SetTargetTemperatureState(uid: string, value: Number) {
@@ -117,6 +114,6 @@ export class CoolMasterController {
 
   async GetLs2State(uid: string) {
     const data = await this.serverControllerQueueCommand(`ls2 ${uid}\n`);
-    return this.parseL2State(data)
+    return this.parseL2State(this.parseCommandResult(data));
   }
 }
