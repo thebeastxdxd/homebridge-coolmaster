@@ -6,12 +6,12 @@ import { CoolMasterController } from './coolmaster-telnet-controller';
 /**
  * This is the name of the platform that users will use to register the plugin in the Homebridge config.json
  */
-const PLATFORM_NAME = 'CoolMasterHomebridgePlugin';
+const PLATFORM_NAME = 'CoolMasterTelnet';
 
 /**
  * This must match the name of your plugin as defined the package.json
  */
-const PLUGIN_NAME = 'homebridge-coolmaster';
+const PLUGIN_NAME = 'homebridge-coolmaster-telnet';
 
 let hap: HAP;
 

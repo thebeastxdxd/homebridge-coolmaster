@@ -60,6 +60,23 @@ export class CoolMasterController {
     return Number(data);
   }
 
+  async SetTemperatureUnit(value: string) {
+    // value should be either C of F
+    await this.serverControllerQueueCommand(`set deg ${value}\n`);
+  }
+
+  async GetTemperatureUnit() {
+    const data = await this.serverControllerQueueCommand(`set\n`);
+    const degLine = data.slice(data.indexOf("deg")).split("\n")[0];
+    return degLine.split(":")[1].trimLeft();
+  }
+
+
+  async GetFanSpeed(uid: string) {
+    const data = await this.serverControllerQueueCommand(`query ${uid} f\n`);
+    return Number(data);
+  }
+
 
   async SetPowerState(uid: string, value: CharacteristicValue) {
     await this.serverControllerQueueCommand(`${(value ? 'on' : 'off')} ${uid}\n`)
@@ -71,6 +88,10 @@ export class CoolMasterController {
 
   async SetHeatState(uid: string) {
     await this.serverControllerQueueCommand(`heat ${uid}\n`);
+  }
+
+  async SetFanSpeed(uid: string, speedMode: string) {
+    await this.serverControllerQueueCommand(`fspeed ${uid} ${speedMode}\n`);
   }
 
   async GetTemperatureModeState(uid: string) {

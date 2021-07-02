@@ -64,10 +64,19 @@ export class CoolMasterPlatformAccessory {
       .onSet(this.handleThresholdTemperatureSet.bind(this));
 
     this.coolerHeaterService.getCharacteristic(this.hap.Characteristic.HeatingThresholdTemperature).props.minValue = 10;
-    // TODO: add more characteristics SwingMode, RotationSpeed
+
+    this.coolerHeaterService.getCharacteristic(this.hap.Characteristic.RotationSpeed)
+      .onGet(this.handleFanSpeedGet.bind(this))
+      .onSet(this.handleFanSpeedSet.bind(this));
+
+    this.coolerHeaterService.getCharacteristic(this.hap.Characteristic.TemperatureDisplayUnits)
+      .onGet(this.handleTemperatureUnitsGet.bind(this));
 
   }
 
+  async handleTemperatureUnitsGet() {
+    return this.controller.GetTemperatureUnit();
+  }
 
   /**
    * Handle requests to get the current value of the "Active" characteristic
@@ -86,11 +95,9 @@ export class CoolMasterPlatformAccessory {
     await this.controller.SetPowerState(this.accessory.context.device.uniqueId, value);
   }
 
-
   /**
    * Handle requests to get the current value of the "Current Heater-Cooler State" characteristic
    */
-  // TODO better names..
   async handleCurrentHeaterCoolerStateGet() {
     this.log.debug(`${this.accessory.context.device.displayName} Triggered GET CurrentHeaterCoolerState`);
 
@@ -114,7 +121,6 @@ export class CoolMasterPlatformAccessory {
   /**
    * Handle requests to get the current value of the "Target Heater-Cooler State" characteristic
    */
-  // TODO: better names
   async handleTargetHeaterCoolerStateGet() {
     this.log.debug(this.accessory.context.device.displayName + ' Triggered GET TargetHeaterCoolerState');
 
@@ -186,6 +192,54 @@ export class CoolMasterPlatformAccessory {
     this.log.debug(this.accessory.context.device.displayName + ' Triggered SET ThresholdTemperature:', value);
     await this.controller.SetTargetTemperatureState(this.accessory.context.device.uniqueId, value as Number);
 
+  }
+
+  async handleFanSpeedGet() {
+    this.log.debug(this.accessory.context.device.displayName + ' Triggered GET Rotation(Fan) Speed');
+    const fanSpeed = await this.controller.GetFanSpeed(this.accessory.context.device.uniqueId);
+
+    let fanSpeedValue :CharacteristicValue = 0.0;
+    switch (fanSpeed) {
+      case 0:
+        fanSpeedValue = 25.0;
+        break;
+      case 1: 
+        fanSpeedValue = 50.0;
+        break;
+      case 2:
+        fanSpeedValue = 75.0;
+        break;
+      case 3:
+        // this is Auto so i can't really know the speed
+        fanSpeedValue = 75.0;
+        break;
+      case 4:
+        fanSpeedValue = 100.0;
+        break;
+      default:
+        this.log.info("invalid value");
+    }
+
+    return fanSpeedValue;
+
+  }
+
+  async handleFanSpeedSet(value: CharacteristicValue) {
+    this.log.debug(this.accessory.context.device.displayName + ' Triggered SET Rotation(Fan) Speed:', value);
+    let fanSpeedMode = "a";
+    if (value <= 25.0) {
+      fanSpeedMode = "l";
+    } else if (value <= 50.0) {
+      fanSpeedMode = "m";
+    } else if (value < 75.0) {
+      fanSpeedMode = "h";
+    } else if (value == 75.0) {
+      fanSpeedMode = "a";
+    } else if (value <= 100.0) {
+      fanSpeedMode = "t";
+    }
+
+    await this.controller.SetFanSpeed(this.accessory.context.device.uniqueId, fanSpeedMode);
   }
 
 }
